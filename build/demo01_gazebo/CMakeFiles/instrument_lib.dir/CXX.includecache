@@ -25,6 +25,14 @@ fstream
 -
 sstream
 -
+random
+-
+cstdlib
+-
+ctime
+-
+set
+-
 
 /opt/ros/noetic/include/ros/advertise_options.h
 ros/forwards.h

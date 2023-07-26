@@ -32,7 +32,7 @@ public:
     std::vector<double> closestPoint1;
     std::vector<double> closestPoint2;
     std::vector<double> centerPoint;
-    double dilation_coe=2;
+    double dilation_coe=1.5;
     double search_radius = 2.5;
 
     central_map()

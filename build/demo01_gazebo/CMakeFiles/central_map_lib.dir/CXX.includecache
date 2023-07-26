@@ -67,6 +67,14 @@ fstream
 -
 sstream
 -
+random
+-
+cstdlib
+-
+ctime
+-
+set
+-
 
 /opt/ros/noetic/include/gazebo_msgs/SpawnModel.h
 ros/service_traits.h

@@ -110,3 +110,27 @@ int findCoordIndex(const std::vector<std::vector<double>> &coords, double x, dou
 
   return -1;
 }
+void RandomCoordinates(int x, int y, double m, const char *file_path)
+{
+  int total_points = static_cast<int>((2 * x) * (2 * y) * m);
+  std::ofstream outfile(file_path, std::ios::trunc);
+
+  // Seed the random number generator with the current time
+  srand(static_cast<unsigned>(time(0)));
+
+  std::set<std::pair<int, int>> coordinates_set;
+
+  while (coordinates_set.size() < total_points)
+  {
+    int rand_x = rand() % (2 * x + 1) - x;
+    int rand_y = rand() % (2 * y + 1) - y;
+    coordinates_set.insert(std::make_pair(rand_x, rand_y));
+  }
+
+  for (const auto &coord : coordinates_set)
+  {
+    outfile << coord.first << "," << coord.second << std::endl;
+  }
+
+  outfile.close();
+}
