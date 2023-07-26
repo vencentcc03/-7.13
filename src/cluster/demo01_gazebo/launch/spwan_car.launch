@@ -1,0 +1,6 @@
+<launch>
+<arg name="num" default="10"/>
+<arg name="model" default="10"/>
+  <!-- 在 gazebo 中显示机器人模型 -->
+<node name="spawn_model_$(arg model)" pkg="gazebo_ros" type="spawn_model" args="-urdf -model mycar_$(arg model) -param robot_description -x $(arg model) -y $(arg model) -z 0" />
+</launch>
