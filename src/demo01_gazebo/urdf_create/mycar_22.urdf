@@ -1,0 +1,55 @@
+
+<!-- 
+    创建一个机器人模型(盒状即可)，显示在 Gazebo 中 
+-->
+
+<robot name="mycar_22">
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="0.9 0.9 0.2" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="yellow">
+                <color rgba="0.5 0.3 0.0 1" />
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.01 0.01 0.002" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="100" />
+            
+            <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="10" />
+        </inertial>
+    </link>
+    <gazebo reference="base_link">
+        <material>Gazebo/Black</material>
+    </gazebo>
+    <gazebo>
+    <plugin name="mobile_base" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>car22/cmd_vel</commandTopic>
+      <odometryTopic>car22/odom</odometryTopic>
+      <odometryFrame>world</odometryFrame>
+        <robotBaseFrame>my_base_link</robotBaseFrame>
+  <odometryRate>1</odometryRate>
+  <cmdTimeout>-1</cmdTimeout>
+    </plugin>
+  </gazebo>
+    <gazebo>
+        <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100</updateRate>
+            <bodyName>base_link</bodyName>
+            <topicName>base_pose_ground_truth_22</topicName>
+            <gaussianNoise>0.0</gaussianNoise>
+            <frameName>map</frameName>
+            <xyzOffsets>0 0 0</xyzOffsets>
+            <rpyOffsets>0 0 0</rpyOffsets>
+        </plugin>
+    </gazebo>
+</robot>

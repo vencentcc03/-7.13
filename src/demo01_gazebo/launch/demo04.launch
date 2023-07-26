@@ -1,0 +1,11 @@
+<launch>
+  <!-- 将 Urdf 文件的内容加载到参数服务器 -->
+  <param name="robot_description" textfile="$(find demo01_gazebo)/urdf/demo01.urdf" />
+
+  <!-- 启动 gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find demo01_gazebo)/worlds/wall01.world" /> -->
+  </include>
+  <node name="my_script_node" pkg="demo01_gazebo" type="spwan_models" output="screen">
+  </node>
+</launch>
