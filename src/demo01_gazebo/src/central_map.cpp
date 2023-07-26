@@ -437,52 +437,15 @@ void central_map::move_next()
 {
   ROS_INFO("123123");
   int match_num = 0;
-  std::vector<ros::Publisher> pubs;
+
   std::vector<geometry_msgs::Twist> msgs;
   ros::Rate rate(500);
   for (auto &c : clusters)
   {
     c.printValues();
   }
-  for (auto &c : clusters)
-  {
-    // 创建用于motor话题的发布器
-    if (c.type == 1)
-    {
-      ros::Publisher motor11_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
-      pubs.push_back(motor11_pub);
-    }
-    if (c.type == 2)
-    {
-      ros::Publisher motor21_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
-      ros::Publisher motor22_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[1], 1);
-
-      pubs.push_back(motor21_pub);
-      pubs.push_back(motor22_pub);
-    }
-    if (c.type == 3)
-    {
-      ros::Publisher motor31_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
-      ros::Publisher motor33_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[2], 1);
-      pubs.push_back(motor31_pub);
-      pubs.push_back(motor33_pub);
-    }
-    if (c.type == 4)
-    {
-      ros::Publisher motor41_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
-      ros::Publisher motor42_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[1], 1);
-      ros::Publisher motor43_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[2], 1);
-      ros::Publisher motor44_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[3], 1);
-      pubs.push_back(motor41_pub);
-      pubs.push_back(motor42_pub);
-      pubs.push_back(motor43_pub);
-      pubs.push_back(motor44_pub);
-    }
-    // ROS_INFO("pubs.size:%d", pubs.size());
-    // ros::Duration(1).sleep();
-  }
+  
   // ROS_INFO("pubs.size:%d", pubs.size());
-
   while (match_num < start_coordinates.size())
   {
     match_num = 0;
@@ -505,9 +468,9 @@ void central_map::move_next()
         else
         {
           if (c.now_point[i][0] < c.next_target[i][0])
-            c.vel_x[i] = 0.1;
+            c.vel_x[i] = vel;
           if (c.now_point[i][0] > c.next_target[i][0])
-            c.vel_x[i] = -0.1;
+            c.vel_x[i] = -1*vel;
           c.vel_msg[i].linear.x = c.vel_x[i];
         }
         if (abs(c.now_point[i][1] - c.next_target[i][1]) < 0.01)
@@ -518,9 +481,9 @@ void central_map::move_next()
         else
         {
           if (c.now_point[i][1] < c.next_target[i][1])
-            c.vel_y[i] = 0.1;
+            c.vel_y[i] = vel;
           if (c.now_point[i][1] > c.next_target[i][1])
-            c.vel_y[i] = -0.1;
+            c.vel_y[i] = -1*vel;
           c.vel_msg[i].linear.y = c.vel_y[i];
         }
       }
@@ -588,5 +551,57 @@ void central_map::move_next()
       pubs[i].publish(msgs[i]);
     }
     rate.sleep();
+  }
+}
+void central_map::generate_pubs(){
+  for (auto &c : clusters)
+  {
+    // 创建用于motor话题的发布器
+    if (c.type == 1)
+    {
+      ros::Publisher motor11_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
+      pubs.push_back(motor11_pub);
+    }
+    if (c.type == 2)
+    {
+      ros::Publisher motor21_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
+      ros::Publisher motor22_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[1], 1);
+
+      pubs.push_back(motor21_pub);
+      pubs.push_back(motor22_pub);
+    }
+    if (c.type == 3)
+    {
+      ros::Publisher motor31_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
+      ros::Publisher motor33_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[2], 1);
+      pubs.push_back(motor31_pub);
+      pubs.push_back(motor33_pub);
+    }
+    if (c.type == 4)
+    {
+      ros::Publisher motor41_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[0], 1);
+      ros::Publisher motor42_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[1], 1);
+      ros::Publisher motor43_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[2], 1);
+      ros::Publisher motor44_pub = nh.advertise<geometry_msgs::Twist>(c.motor_topic[3], 1);
+      pubs.push_back(motor41_pub);
+      pubs.push_back(motor42_pub);
+      pubs.push_back(motor43_pub);
+      pubs.push_back(motor44_pub);
+    }
+    // ROS_INFO("pubs.size:%d", pubs.size());
+    // ros::Duration(1).sleep();
+  }
+}
+void central_map::incrementNextTarget()
+{
+  for (auto &c : clusters)
+  {
+    for (size_t i = 0; i < c.next_target.size(); ++i)
+    {
+      for (size_t j = 0; j < c.next_target[i].size(); ++j)
+      {
+          c.next_target[i][j] += 1.0; // 加一操作
+      }
+    }
   }
 }

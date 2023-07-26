@@ -7,7 +7,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "robot_map");
 
     ros::NodeHandle nh;
-
+    // RandomCoordinates(7, 7, 0.5, "/home/haichao/demo_ws/src/demo01_gazebo/coordinate/start_coordinates.csv");
+    // RandomCoordinates(7, 7, 0.5, "/home/haichao/demo_ws/src/demo01_gazebo/coordinate/target_coordinates.csv");
     central_map *map = new central_map();
     map->module_divition();
     ROS_INFO("finish divition");
@@ -20,6 +21,8 @@ int main(int argc, char **argv)
         // }
         std::thread t([&]()
                       { map->upload_realtime_coos(); });
+        map->generate_pubs();
+        ros::Duration(10).sleep();
         // for (int i=0;i<10;i++){
         //     for (auto &c : map->clusters)
         // {
@@ -28,6 +31,9 @@ int main(int argc, char **argv)
         // ros::Duration(0.3).sleep();
         // }
         map->dilation();
+        ros::Duration(1).sleep();
+        map->incrementNextTarget();
+        map->move_next();
         ROS_INFO("finish1");
         if (t.joinable())
         {

@@ -25,9 +25,9 @@ public:
     std::vector<cluster> clusters;
     int mapsize_X;
     int mapsize_y;
-    int vel_x;
-    int vel_y;
+    double vel=1;
     std::vector<ros::Subscriber> subscribers; // 一组订阅者用于订阅机器人的位置信息
+    std::vector<ros::Publisher> pubs;
     ros::NodeHandle nh;
     std::vector<double> closestPoint1;
     std::vector<double> closestPoint2;
@@ -55,5 +55,7 @@ public:
     void dilation();
     void complete_next_tar(cluster &c);
     void move_next();
+    void generate_pubs();
+    void incrementNextTarget();
 };
 #endif
