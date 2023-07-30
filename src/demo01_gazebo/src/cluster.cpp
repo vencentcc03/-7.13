@@ -3,6 +3,7 @@
 void cluster::printValues()
 {
     ROS_INFO("type: %d", type);
+    ROS_INFO("cluster_index: %d", cluster_index);
 
     ROS_INFO("index: ");
     for (int i : index)

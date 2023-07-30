@@ -151,7 +151,7 @@ void central_map::module_divition()
   // printDoubleVector(target_coordinates);
   // printDoubleVector(start_coo);
   // printDoubleVector(target_coo);
-
+  int cluster_index = 1;
   while (start_coo.size() && target_coo.size())
   {
     // ROS_INFO("123123");
@@ -178,13 +178,13 @@ void central_map::module_divition()
     }
 
   break_label:
-  //     ROS_INFO("hello");
-  //   printDoubleVector(sta);
-  //   printDoubleVector(tar);
-  //   printDoubleVector(start_coo);
-  //   printDoubleVector(target_coo);
-  //   ROS_INFO("sta.size:%d",sta.size());
-  //   ROS_INFO("tar.size:%d",tar.size());
+    //     ROS_INFO("hello");
+    //   printDoubleVector(sta);
+    //   printDoubleVector(tar);
+    //   printDoubleVector(start_coo);
+    //   printDoubleVector(target_coo);
+    //   ROS_INFO("sta.size:%d",sta.size());
+    //   ROS_INFO("tar.size:%d",tar.size());
     // ROS_INFO("start_coo.size:%d",start_coo.size());
     // ROS_INFO("target_coo.size:%d",target_coo.size());
     // for (const auto &g : clusters)
@@ -196,10 +196,10 @@ void central_map::module_divition()
     // ros::Duration(1.0).sleep();
     while (sta.size() && tar.size())
     { // 遍历sta和tar如果满足条件就将满足条件的点从sta、tar、start_coo、target_coo中剔除，并生成相应类型的cluster存储进vector<cluster>中
-        // ROS_INFO("start_coo.size:%d", start_coo.size());
-        // ROS_INFO("target_coo.size:%d", target_coo.size());
-        for (const auto &startPoint1 : sta)
-        {
+      // ROS_INFO("start_coo.size:%d", start_coo.size());
+      // ROS_INFO("target_coo.size:%d", target_coo.size());
+      for (const auto &startPoint1 : sta)
+      {
         std::vector<double> startPoint = startPoint1;
         if (isCoordinateExists(sta, startPoint[0] + 1, startPoint[1]) && isCoordinateExists(sta, startPoint[0] + 1, startPoint[1] + 1) && isCoordinateExists(sta, startPoint[0], startPoint[1] + 1))
         {
@@ -238,6 +238,8 @@ void central_map::module_divition()
               // cluster1.now_point[0] = startPoint;
               cluster1.vel_x[0] = 0;
               cluster1.vel_y[0] = 0;
+              cluster1.cluster_index = cluster_index;
+              cluster_index++;
               clusters.push_back(cluster1);
               removeCoordinate(sta, startPoint[0] + 1, startPoint[1]);
               removeCoordinate(sta, startPoint[0] + 1, startPoint[1] + 1);
@@ -284,6 +286,8 @@ void central_map::module_divition()
               // cluster1.now_point[0] = startPoint;
               cluster1.vel_x[0] = 0;
               cluster1.vel_y[0] = 0;
+              cluster1.cluster_index = cluster_index;
+              cluster_index++;
               clusters.push_back(cluster1);
 
               removeCoordinate(sta, startPoint[0], startPoint[1] + 1);
@@ -323,6 +327,8 @@ void central_map::module_divition()
               // cluster1.now_point[0] = startPoint;
               cluster1.vel_x[0] = 0;
               cluster1.vel_y[0] = 0;
+              cluster1.cluster_index = cluster_index;
+              cluster_index++;
               clusters.push_back(cluster1);
               // printVector(startPoint);
               removeCoordinate(sta, startPoint[0] + 1, startPoint[1]);
@@ -354,6 +360,8 @@ void central_map::module_divition()
           // cluster1.now_point[0] = startPoint;
           cluster1.vel_x[0] = 0;
           cluster1.vel_y[0] = 0;
+          cluster1.cluster_index = cluster_index;
+          cluster_index++;
           clusters.push_back(cluster1);
           std::vector<double> tar1 = tar[0];
           removeCoordinate(sta, startPoint[0], startPoint[1]);
@@ -382,6 +390,52 @@ void central_map::find_centerpoint()
   double centerX = (minX + maxX) / 2.0;
   double centerY = (minY + maxY) / 2.0;
   centerPoint = {centerX, centerY};
+}
+// 刷新coordinates,dilation之后
+void central_map::update_coordinates()
+{
+  coordinates.resize(start_coordinates.size()); // 设置 coordinates 的行数
+  for (size_t i = 0; i < start_coordinates.size(); ++i)
+  {
+    coordinates[i].resize(2); // 设置每一行的列数为2
+    coordinates[i][0] = 0.0;  // 设置每一行的第一个元素为0.0
+    coordinates[i][1] = 0.0;  // 设置每一行的第二个元素为0.0
+  }
+  int j = 0;
+  for (const auto &c : clusters)
+  {
+    j = 0;
+    for (const auto &i : c.index)
+    {
+      if (i != 0)
+      {
+        coordinates[i - 1] = c.now_point[j];
+      }
+      j++;
+    }
+  }
+}
+// 设置边界值
+void central_map::set_boundary()
+{
+  update_coordinates();
+  double minX = 100000, maxX = 1, minY = 10000, maxY = 0;
+  for (const auto &point : coordinates)
+  {
+    minX = std::min(minX, point[0]);
+    maxX = std::max(maxX, point[0]);
+
+    minY = std::min(minY, point[1]);
+    maxY = std::max(maxY, point[1]);
+  }
+  minX--;
+  maxX++;
+  minY--;
+  maxY++;
+  mapsize_maxx = maxX;
+  mapsize_maxy = maxY;
+  mapsize_minx = minX;
+  mapsize_miny = minY;
 }
 void central_map::complete_next_tar(cluster &c)
 {
@@ -440,11 +494,11 @@ void central_map::move_next()
 
   std::vector<geometry_msgs::Twist> msgs;
   ros::Rate rate(500);
-  for (auto &c : clusters)
-  {
-    c.printValues();
-  }
-  
+  // for (auto &c : clusters)
+  // {
+  //   c.printValues();
+  // }
+
   // ROS_INFO("pubs.size:%d", pubs.size());
   while (match_num < start_coordinates.size())
   {
@@ -470,7 +524,7 @@ void central_map::move_next()
           if (c.now_point[i][0] < c.next_target[i][0])
             c.vel_x[i] = vel;
           if (c.now_point[i][0] > c.next_target[i][0])
-            c.vel_x[i] = -1*vel;
+            c.vel_x[i] = -1 * vel;
           c.vel_msg[i].linear.x = c.vel_x[i];
         }
         if (abs(c.now_point[i][1] - c.next_target[i][1]) < 0.01)
@@ -483,64 +537,64 @@ void central_map::move_next()
           if (c.now_point[i][1] < c.next_target[i][1])
             c.vel_y[i] = vel;
           if (c.now_point[i][1] > c.next_target[i][1])
-            c.vel_y[i] = -1*vel;
+            c.vel_y[i] = -1 * vel;
           c.vel_msg[i].linear.y = c.vel_y[i];
         }
       }
     }
-      for (auto &c : clusters)
+    for (auto &c : clusters)
+    {
+      switch (c.type)
       {
-        switch (c.type)
-        {
-        case 1:
-          msgs.push_back(c.vel_msg[0]);
-          break;
-        case 2:
-          msgs.push_back(c.vel_msg[0]);
-          msgs.push_back(c.vel_msg[1]);
-          break;
-        case 3:
-          msgs.push_back(c.vel_msg[0]);
-          msgs.push_back(c.vel_msg[2]);
-          break;
-        case 4:
-          msgs.push_back(c.vel_msg[0]);
-          msgs.push_back(c.vel_msg[1]);
-          msgs.push_back(c.vel_msg[2]);
-          msgs.push_back(c.vel_msg[3]);
-          break;
-        }
-        switch (c.type)
-        {
-        case 1:
-          if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
-            match_num++;
-          break;
-        case 2:
-          if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
-            match_num++;
-          if (c.vel_x[1] == 0 && c.vel_y[1] == 0)
-            match_num++;
-          break;
-        case 3:
-          if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
-            match_num++;
-          if (c.vel_x[2] == 0 && c.vel_y[2] == 0)
-            match_num++;
-          break;
-        case 4:
-          if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
-            match_num++;
-          if (c.vel_x[1] == 0 && c.vel_y[1] == 0)
-            match_num++;
-          if (c.vel_x[2] == 0 && c.vel_y[2] == 0)
-            match_num++;
-          if (c.vel_x[3] == 0 && c.vel_y[3] == 0)
-            match_num++;
-          break;
-        }
+      case 1:
+        msgs.push_back(c.vel_msg[0]);
+        break;
+      case 2:
+        msgs.push_back(c.vel_msg[0]);
+        msgs.push_back(c.vel_msg[1]);
+        break;
+      case 3:
+        msgs.push_back(c.vel_msg[0]);
+        msgs.push_back(c.vel_msg[2]);
+        break;
+      case 4:
+        msgs.push_back(c.vel_msg[0]);
+        msgs.push_back(c.vel_msg[1]);
+        msgs.push_back(c.vel_msg[2]);
+        msgs.push_back(c.vel_msg[3]);
+        break;
       }
-    
+      switch (c.type)
+      {
+      case 1:
+        if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
+          match_num++;
+        break;
+      case 2:
+        if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
+          match_num++;
+        if (c.vel_x[1] == 0 && c.vel_y[1] == 0)
+          match_num++;
+        break;
+      case 3:
+        if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
+          match_num++;
+        if (c.vel_x[2] == 0 && c.vel_y[2] == 0)
+          match_num++;
+        break;
+      case 4:
+        if (c.vel_x[0] == 0 && c.vel_y[0] == 0)
+          match_num++;
+        if (c.vel_x[1] == 0 && c.vel_y[1] == 0)
+          match_num++;
+        if (c.vel_x[2] == 0 && c.vel_y[2] == 0)
+          match_num++;
+        if (c.vel_x[3] == 0 && c.vel_y[3] == 0)
+          match_num++;
+        break;
+      }
+    }
+
     for (int i = 0; i < pubs.size(); ++i)
     {
       // auto now = std::chrono::system_clock::now();
@@ -553,7 +607,8 @@ void central_map::move_next()
     rate.sleep();
   }
 }
-void central_map::generate_pubs(){
+void central_map::generate_pubs()
+{
   for (auto &c : clusters)
   {
     // 创建用于motor话题的发布器
@@ -592,6 +647,7 @@ void central_map::generate_pubs(){
     // ros::Duration(1).sleep();
   }
 }
+// 让机器人全部向右下移动，用于测试运动函数
 void central_map::incrementNextTarget()
 {
   for (auto &c : clusters)
@@ -600,8 +656,160 @@ void central_map::incrementNextTarget()
     {
       for (size_t j = 0; j < c.next_target[i].size(); ++j)
       {
-          c.next_target[i][j] += 1.0; // 加一操作
+        c.next_target[i][j] += 1.0; // 加一操作
       }
     }
+  }
+}
+// a*算法
+int central_map::a_star(const Node &start, const Node &goal, int type)
+{
+  std::priority_queue<Node, std::vector<Node>, CompareNodes> openSet;
+  std::vector<std::vector<double>> closedSet = coordinates;
+  is_goal_attainable(goal, type, closedSet);
+
+  openSet.push(start);
+
+  while (!openSet.empty())
+  {
+    Node current = openSet.top();
+    openSet.pop();
+
+    // 到达目标节点
+    if (current.x == goal.x && current.y == goal.y)
+    {
+      return current.g;
+    }
+
+    closedSet.push_back({current.x, current.y});
+
+    // 扩展节点，加入openset
+    expand_node(openSet, closedSet, current,goal,type);
+  }
+
+  return -1; // 未找到路径
+}
+// 判断终点是否有
+void central_map::is_goal_attainable(const Node &goal, int type, std::vector<std::vector<double>> &closedset)
+{
+  if (type == 1)
+  {
+    if (isCoordinateExists(closedset, goal.x, goal.y))
+    {
+      removeCoordinate(closedset, goal.x, goal.y);
+    }
+  }
+  if (type == 2)
+  {
+    if (isCoordinateExists(closedset, goal.x, goal.y))
+    {
+      removeCoordinate(closedset, goal.x, goal.y);
+    }
+    if (isCoordinateExists(closedset, goal.x, goal.y + 1))
+    {
+      removeCoordinate(closedset, goal.x, goal.y + 1);
+    }
+  }
+  if (type == 3)
+  {
+    if (isCoordinateExists(closedset, goal.x, goal.y))
+    {
+      removeCoordinate(closedset, goal.x, goal.y);
+    }
+    if (isCoordinateExists(closedset, goal.x + 1, goal.y))
+    {
+      removeCoordinate(closedset, goal.x + 1, goal.y);
+    }
+  }
+  if (type == 4)
+  {
+    if (isCoordinateExists(closedset, goal.x, goal.y))
+    {
+      removeCoordinate(closedset, goal.x, goal.y);
+    }
+    if (isCoordinateExists(closedset, goal.x + 1, goal.y))
+    {
+      removeCoordinate(closedset, goal.x + 1, goal.y);
+    }
+    if (isCoordinateExists(closedset, goal.x, goal.y + 1))
+    {
+      removeCoordinate(closedset, goal.x, goal.y + 1);
+    }
+    if (isCoordinateExists(closedset, goal.x + 1, goal.y + 1))
+    {
+      removeCoordinate(closedset, goal.x + 1, goal.y + 1);
+    }
+  }
+}
+void central_map::expand_node(std::priority_queue<Node, std::vector<Node>, CompareNodes> &openSet,
+                              std::vector<std::vector<double>> &closedSet,
+                              Node &current, const Node &goal, int type)
+{
+    int dx[] = {-1, 0, 1, 0};
+    int dy[] = {0, 1, 0, -1};
+    for (int i = 0; i < 4; i++)
+    {
+      double nextx = current.x + dx[i];
+      double nexty = current.y + dy[i];
+
+      // 检查是否在边界内且不是障碍物
+      if (isValidNode(nextx, nexty, closedSet, type))
+      {
+        // 检查是否已经在打开列表中
+
+        if (!isInOpenSet(nextx, nexty, openSet))
+        {
+          Node a(nextx, nexty);
+          a.g=current.g+1;
+          a.h=heuristic(a,goal);
+          a.f=a.g+a.h;
+          openSet.push(a);
+        }
+      }
+    }
+}
+bool central_map::isValidNode(double x, double y, const std::vector<std::vector<double>> &closedset, int type)
+{
+  if (type == 1)
+  {
+    if (x > mapsize_minx && x < mapsize_maxx && y > mapsize_miny && y < mapsize_maxy && (!isCoordinateExists(closedset, x, y)))
+      return true;
+    else
+      return false;
+  }
+  if (type == 2)
+  {
+    if (x > mapsize_minx && x < mapsize_maxx && y > mapsize_miny && y < mapsize_maxy && (!isCoordinateExists(closedset, x, y)) && y + 1 > mapsize_miny && y + 1 < mapsize_maxy && (!isCoordinateExists(closedset, x, y + 1)))
+      return true;
+    else
+      return false;
+  }
+  if (type == 3)
+  {
+    if (x > mapsize_minx && x < mapsize_maxx && y > mapsize_miny && y < mapsize_maxy && (!isCoordinateExists(closedset, x, y)) && x + 1 > mapsize_minx && x + 1 < mapsize_maxx && (!isCoordinateExists(closedset, x + 1, y)))
+      return true;
+    else
+      return false;
+  }
+  if (type == 4)
+  {
+    if (x > mapsize_minx && x + 1 < mapsize_maxx && y > mapsize_miny && y + 1 < mapsize_maxy && (!isCoordinateExists(closedset, x, y)) && (!isCoordinateExists(closedset, x, y + 1)) && (!isCoordinateExists(closedset, x + 1, y)) && (!isCoordinateExists(closedset, x + 1, y + 1)))
+      return true;
+    else
+      return false;
+  }
+}
+// 判断是否在openset内
+bool central_map::isInOpenSet(double x, double y, const std::priority_queue<Node, std::vector<Node>, CompareNodes> &openSet)
+{
+  std::priority_queue<Node, std::vector<Node>, CompareNodes> openset = openSet;
+  bool flag = false;
+  while (!openset.empty())
+  {
+    Node temp = openset.top();
+    openset.pop();
+    if (temp.x == x && temp.y == y)
+      flag = true;
+    return flag;
   }
 }
