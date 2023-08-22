@@ -39,7 +39,7 @@ bool isCoordinateExists(const std::vector<std::vector<double>> &coordinates, dou
 {
   for (const auto &point : coordinates)
   {
-    if (point[0] == x && point[1] == y)
+    if (((point[0] - x)<0.001) && ((point[1] - y)<0.001))
     {
       return true; // 找到匹配的坐标
     }
@@ -133,4 +133,15 @@ void RandomCoordinates(int x, int y, double m, const char *file_path)
   }
 
   outfile.close();
+}
+void printPriorityQueue(const std::priority_queue<Node, std::vector<Node>, CompareNodes> &pq)
+{
+  std::priority_queue<Node, std::vector<Node>, CompareNodes> tempPQ = pq; // Create a copy of the priority queue
+
+  while (!tempPQ.empty())
+  {
+    Node node = tempPQ.top();
+    node.node_print(); // Assuming you have the node_print() method defined in your Node class
+    tempPQ.pop();
+  }
 }

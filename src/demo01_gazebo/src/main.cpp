@@ -9,52 +9,50 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     // RandomCoordinates(7, 7, 0.5, "/home/haichao/demo_ws/src/demo01_gazebo/coordinate/start_coordinates.csv");
     // RandomCoordinates(7, 7, 0.5, "/home/haichao/demo_ws/src/demo01_gazebo/coordinate/target_coordinates.csv");
-    central_map *map = new central_map();
-    map->module_divition();
+    central_map *map = new central_map();//创建对象，构造函数已经传入初始坐标与目标坐标，并将机器人加载入gazebo
+    map->module_divition();//模块划分算法
     ROS_INFO("finish divition");
 
     std::thread t([&]()
-                  { map->upload_realtime_coos(); });
-    map->generate_pubs();
-    ros::Duration(10).sleep();
+                  { map->upload_realtime_coos(); });//将获取实时坐标加入新线程
+    map->generate_pubs();//部署速度信息发布器
+    ros::Duration(10).sleep();//等待足够的时间，保证所有发布器部署完成
     // // for (int i=0;i<10;i++){
     // for (auto &c : map->clusters)
     // {
     //     c.printValues();
     // }
-
     // ros::Duration(0.3).sleep();
     // }
-    map->dilation();
+    map->dilation();//扩散
     map->clusters[0].printValues();
     ros::Duration(1).sleep();
     // map->incrementNextTarget();
     // map->move_next();
-    map->set_boundary();
+    map->set_boundary();//设置边界大小
     // printDoubleVector(map->coordinates);
     std::vector<std::pair<int, int>> pairVector;
     double x = map->clusters[0].now_point[0][0];
     double y = map->clusters[0].now_point[0][1];
-    int dx[] = {-1, 0, 1, 0}; // 下右上左
+    int dx[] = {-1, 0, 1, 0}; // 上右下左
     int dy[] = {0, 1, 0, -1};
     Node tar(map->clusters[0].tar_point[0][0], map->clusters[0].tar_point[0][1]);
     tar.node_print();
-    while (!(map->clusters[0].now_point[0] == map->clusters[0].tar_point[0]))
+
+    while (map->clusters[0].now_point[0] != map->clusters[0].tar_point[0])
     {
         pairVector.clear();
         for (int i = 0; i < 4; i++)
         {
 
             Node current(x + dx[i], y + dy[i]);
-            current.h=heuristic(current,tar);
-            current.f=current.h;
-            current.node_print();
+            // current.node_print();
             std::pair<int, int> a = std::make_pair(i, map->a_star(current, tar, map->clusters[0].type));
             pairVector.push_back(a);
         }
         int minSecondParam = pairVector[0].second;
         int minFirstParam = pairVector[0].first;
-        ROS_INFO("i===%d",minFirstParam);
+        
         for (const auto &p : pairVector)
         {
             if (p.second < minSecondParam)

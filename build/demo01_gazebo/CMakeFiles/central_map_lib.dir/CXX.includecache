@@ -77,6 +77,8 @@ fstream
 -
 sstream
 -
+cluster.h
+/home/haichao/demo_ws/src/demo01_gazebo/src/cluster.h
 
 /opt/ros/noetic/include/gazebo_msgs/SpawnModel.h
 ros/service_traits.h

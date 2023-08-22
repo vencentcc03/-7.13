@@ -33,7 +33,7 @@ void central_map::upload_realtime_coos()
     }
   }
 
-  ros::Rate rate(100); // 设置循环的频率为10Hz
+  ros::Rate rate(100); // 设置循环的频率为100Hz
 
   while (ros::ok())
   {
@@ -684,7 +684,7 @@ int central_map::a_star(const Node &start, const Node &goal, int type)
     closedSet.push_back({current.x, current.y});
 
     // 扩展节点，加入openset
-    expand_node(openSet, closedSet, current,goal,type);
+    expand_node(openSet, closedSet, current, goal, type);
   }
 
   return -1; // 未找到路径
@@ -745,28 +745,35 @@ void central_map::expand_node(std::priority_queue<Node, std::vector<Node>, Compa
                               std::vector<std::vector<double>> &closedSet,
                               Node &current, const Node &goal, int type)
 {
-    int dx[] = {-1, 0, 1, 0};
-    int dy[] = {0, 1, 0, -1};
-    for (int i = 0; i < 4; i++)
+  ROS_INFO("dangqinapoint::%f,%f", current.x, current.y);
+  int dx[] = {-1, 0, 1, 0}; // 上右下左
+  int dy[] = {0, 1, 0, -1};
+  for (int i = 0; i < 4; i++)
+  {
+    double nextx = current.x + dx[i];
+    double nexty = current.y + dy[i];
+    ROS_INFO("(x,y):%f,%f", nextx, nexty);
+    // 检查是否在边界内且不是障碍物
+    if (isValidNode(nextx, nexty, closedSet, type))
     {
-      double nextx = current.x + dx[i];
-      double nexty = current.y + dy[i];
+      // 检查是否已经在打开列表中
 
-      // 检查是否在边界内且不是障碍物
-      if (isValidNode(nextx, nexty, closedSet, type))
+      if (!isInOpenSet(nextx, nexty, openSet))
       {
-        // 检查是否已经在打开列表中
-
-        if (!isInOpenSet(nextx, nexty, openSet))
-        {
-          Node a(nextx, nexty);
-          a.g=current.g+1;
-          a.h=heuristic(a,goal);
-          a.f=a.g+a.h;
-          openSet.push(a);
-        }
+        Node a(nextx, nexty);
+        a.g = current.g + 1;
+        a.h = heuristic(a, goal);
+        a.f = a.g + a.h;
+        openSet.push(a);
+        a.node_print();
+        ROS_INFO("openset:::");
+        printPriorityQueue(openSet);
+        ROS_INFO("closeset:::");
+        printDoubleVector(closedSet);
+        ros::Duration(1).sleep();
       }
     }
+  }
 }
 bool central_map::isValidNode(double x, double y, const std::vector<std::vector<double>> &closedset, int type)
 {

@@ -59,6 +59,8 @@ fstream
 -
 sstream
 -
+cluster.h
+/home/haichao/demo_ws/src/demo01_gazebo/src/cluster.h
 
 /home/haichao/demo_ws/src/demo01_gazebo/src/main.cpp
 central_map.h

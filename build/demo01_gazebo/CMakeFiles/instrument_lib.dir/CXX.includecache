@@ -6,6 +6,20 @@
 
 #IncludeRegexTransform: 
 
+/home/haichao/demo_ws/src/demo01_gazebo/src/cluster.h
+string
+-
+vector
+-
+ros/ros.h
+-
+geometry_msgs/Twist.h
+-
+queue
+-
+cmath
+-
+
 /home/haichao/demo_ws/src/demo01_gazebo/src/instrument.cpp
 iostream
 -
@@ -24,6 +38,44 @@ vector
 fstream
 -
 sstream
+-
+cluster.h
+/home/haichao/demo_ws/src/demo01_gazebo/src/cluster.h
+
+/opt/ros/noetic/include/geometry_msgs/Twist.h
+string
+-
+vector
+-
+memory
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
+-
+geometry_msgs/Vector3.h
+-
+geometry_msgs/Vector3.h
+-
+
+/opt/ros/noetic/include/geometry_msgs/Vector3.h
+string
+-
+vector
+-
+memory
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
 -
 
 /opt/ros/noetic/include/ros/advertise_options.h
@@ -234,6 +286,10 @@ boost/make_shared.hpp
 cstddef
 -
 memory
+-
+
+/opt/ros/noetic/include/ros/message_operations.h
+ostream
 -
 
 /opt/ros/noetic/include/ros/message_traits.h
