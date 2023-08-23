@@ -1,0 +1,8 @@
+<launch>
+  <!-- 启动 gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find demo01_gazebo)/worlds/wall01.world" /> -->
+  </include>
+  <node name="my_script_node" pkg="demo01_gazebo" type="main" output="screen">
+  </node>
+</launch>
