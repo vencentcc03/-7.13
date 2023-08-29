@@ -1,0 +1,2 @@
+demo01_gazebo
+-DCATKIN_DEVEL_PREFIX=/home/haichao/demo_ws/devel -DCMAKE_INSTALL_PREFIX=/home/haichao/demo_ws/install -G Unix Makefiles

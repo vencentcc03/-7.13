@@ -1,0 +1,8 @@
+prefix=/home/haichao/demo_ws/devel
+
+Name: demo01_gazebo
+Description: Description of demo01_gazebo
+Version: 0.0.0
+Cflags: -I/home/haichao/demo_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: gazebo_plugins gazebo_ros gazebo_ros_control urdf xacro message_runtime

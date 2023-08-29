@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/haichao/demo_ws/src/demo01_gazebo/history/create_urdf.cpp
+iostream
+-
+fstream
+-
+sstream
+-
+string
+-
+
