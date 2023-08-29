@@ -1,0 +1,234 @@
+function dis = A_star_type_dis(start,goal,map,cur_robot)
+% 考虑type的A_star距离 
+type = cur_robot.type;
+dis = 0;
+n = 3;
+if size(start,2) ~= size(goal,2)
+    a = 1;
+    return;
+end
+if start == goal
+    return;
+end
+used = zeros(map.map_size + n,map.map_size + n);
+cur_node = start;
+open_set = [];
+open_set = [open_set;cur_node(1),cur_node(2),distance(start,cur_node)+distance(cur_node,goal)];
+father = cell(map.map_size,map.map_size);
+dx = [-1 0 1 0];
+dy = [0 1 0 -1];
+max_num = map.map_size * map.map_size;
+idx = 1;
+end_flag = false;
+elmite_M(cur_robot,map);
+while size(open_set,1) > 0
+    idx = idx + 1;
+    if idx > max_num
+        dis = max_num;
+        break;
+    end
+    f_min_idx = 0;
+    f_min = max_num * 2;
+    for i = 1:size(open_set,1) % 找到open_set内最小的
+        if open_set(i,3) < f_min
+            f_min = open_set(i,3);
+            f_min_idx = i;
+        end
+    end
+    cur_node = open_set(f_min_idx,:);
+    open_set(f_min_idx,:) = [];
+    if cur_node(1) <= 0 || cur_node(2) <= 0
+       aaa = 1; 
+    end
+    used(cur_node(1) + n, cur_node(2) + n) = 1;
+    
+    for i = 1:size(dx,2)
+        x = cur_node(1) + dx(i);
+        y = cur_node(2) + dy(i);
+        if x == goal(1) && y == goal(2)
+            father{x,y} = cur_node;
+            end_flag = true;
+            break;
+        end
+        if x > map.map_size || y > map.map_size || x <=0 || y<=0 || used(x + n,y + n) == 1
+            continue;
+        end
+        if check_collision(x,y,type,map) == true
+            continue;
+        end
+        
+        
+        
+        used(x + n,y + n) = 1;
+        open_set = [open_set;x,y,distance(start,[x,y])+distance([x,y],goal)];
+        father{x,y} = cur_node;
+    end
+    if end_flag == true
+        break;
+    end
+end
+
+return_M(cur_robot,map);
+
+if end_flag == false
+    dis = max_num;
+    return;
+end
+
+cur_node = goal;
+% flag = father{cur_node(1),cur_node(2)}(1) == start(1) && father{cur_node(1),cur_node(2)}(1) == start(2) ;
+while 1
+    cur_node = father{cur_node(1),cur_node(2)};
+    
+    node_father = father{cur_node(1),cur_node(2)};
+    if size(node_father,1) == 0
+        break;
+    end
+    dis = dis+1;
+    if node_father(1) == start(1) && node_father(2) == start(2)
+        break;
+    end
+end
+dis = dis+1;
+return;
+
+end
+
+function return_M(cur_robot,map)
+type = cur_robot.type;
+x = cur_robot.wp(1); y = cur_robot.wp(2);
+if type == 1
+    map.M(x,y) = 1;
+elseif type == 2
+    surr = [x,y; x+1,y+1; x+1,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 1;
+    end
+    
+elseif type ==3
+    surr = [x,y; x+1,y];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 1;
+    end
+    
+elseif type == 4
+    surr = [x,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 1;
+    end
+    
+end
+
+
+
+end
+
+
+function elmite_M(cur_robot,map)
+type = cur_robot.type;
+x = cur_robot.wp(1); y = cur_robot.wp(2);
+if type == 1
+    map.M(x,y) = 0;
+elseif type == 2
+    surr = [x,y; x+1,y+1; x+1,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 0;
+    end
+    
+elseif type ==3
+    surr = [x,y; x+1,y];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 0;
+    end
+    
+elseif type == 4
+    surr = [x,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        map.M(a,b) = 0;
+    end
+    
+end
+
+end
+
+
+
+function flag = check_collision(x,y,type,map)
+
+flag = false;
+
+if type == 1
+    if map.M(x,y) == 1
+       flag = true; 
+    end
+    
+elseif type == 2
+    surr = [x,y; x+1,y+1; x+1,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        if a > map.map_size || b > map.map_size || a <=0 || b<=0
+            flag = true; 
+            break;
+        else
+            if map.M(a,b) == 1
+               flag = true; 
+               break;
+            end
+        end  
+    end
+    
+elseif type ==3
+    surr = [x,y; x+1,y];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        if a > map.map_size || b > map.map_size || a <=0 || b<=0
+            flag = true; 
+            break;
+        else
+            if map.M(a,b) == 1
+               flag = true; 
+               break;
+            end
+        end  
+    end
+    
+elseif type == 4
+    surr = [x,y; x,y+1];
+    for i = 1:size(surr,1)
+        a = surr(i,1); b = surr(i,2);
+        if a > map.map_size || b > map.map_size || a <=0 || b<=0
+            flag = true; 
+            break;
+        else
+            if map.M(a,b) == 1
+               flag = true; 
+               break;
+            end
+        end  
+    end
+    
+end
+
+
+
+end
+
+
+
+
+
+function dis = distance(pa,pb)
+%曼哈顿距离
+dis = abs(pa(1) - pb(1)) + abs(pa(2) - pb(2));
+
+end
+function dis = Euclid_distance(pa,pb)
+%欧氏距离
+dis = sqrt( (pa(1) - pb(1))^2 +  (pa(2) - pb(2))^2 );
+end

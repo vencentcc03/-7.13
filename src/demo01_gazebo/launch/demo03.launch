@@ -1,0 +1,15 @@
+<launch>
+  <!-- 将 Urdf 文件的内容加载到参数服务器 -->
+  <param name="robot_description" textfile="$(find demo01_gazebo)/urdf/demo01.urdf" />
+
+  <!-- 启动 gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find demo01_gazebo)/worlds/wall01.world" /> -->
+  </include>
+    <!-- 定义循环的次数 -->
+
+  <!-- 使用 for 循环生成多个节点 -->
+  <!-- <node name="robot_position_node" pkg="demo01_gazebo" type="/src/coordinate_acq.cpp" output="screen"/> -->
+  <include file="$(find demo01_gazebo)/launch/03demoshell.launch">
+  </include>
+</launch>
