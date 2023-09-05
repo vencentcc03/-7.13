@@ -482,6 +482,10 @@ void central_map::set_boundary()
   maxX++;
   minY--;
   maxY++;
+  minX--;
+  maxX++;
+  minY--;
+  maxY++;
   mapsize_maxx = maxX;
   mapsize_maxy = maxY;
   mapsize_minx = minX;
@@ -719,7 +723,7 @@ int central_map::a_star(const Node &start, const Node &goal, int type)
   std::priority_queue<Node, std::vector<Node>, CompareNodes> openSet;
   std::vector<std::vector<double>> closedSet = coordinates;
   is_goal_attainable(goal, type, closedSet);
-  // type = 1;
+  type = 1;
 
   openSet.push(start);
 
@@ -933,7 +937,6 @@ void central_map::a_star_astep()
         {
           for (int i = 0; i < 4; i++)
           {
-
             Node current(x + dx[i], y + dy[i]);
             ROS_INFO("mainpoint::::::::::::::::::::::::::::::::::::");
             // current.node_print();
